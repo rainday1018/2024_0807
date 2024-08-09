@@ -11,7 +11,6 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-
 import os
 import sys
 from argparse import ArgumentParser
@@ -36,9 +35,10 @@ from linebot.v3.messaging import (
 )
 import os,sys
 from heandle_key import get_secret_and_token 
+from opai0809 import  chat_with_chatgpt
 
 app = Flask(__name__)
-keys = get_secret_and_token ()
+keys = get_secret_and_token()
 handler = WebhookHandler(keys['LINE_BOT_SECRET_KEY'])
 configuration = Configuration( access_token=keys['LINE_CHANNEL_ACCESS_TOKEN'])
 
@@ -48,6 +48,11 @@ def say_hello_world(username=""):
 
 @app.route("/callback", methods=['POST'])
 def callback():
+    # 設計一個 #callback 的路由，提供給Line官方後台去呼叫
+    # 也就所謂的呼叫Webhook Server
+    # 因為官方會把使用者傳輸的訊息轉傳給Webhook Server
+    # 所以會使用 RESTful API 的 POST 方法
+
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
@@ -59,19 +64,26 @@ def callback():
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
+        app.logger.info("Invalid signature. Please check your channel access token/channel secret.")
         abort(400)
-
-    return 'OK'
+        
+    return "OK"
 
 
 @handler.add(MessageEvent, message=TextMessageContent)
 def message_text(event):
+
+    user_message = event.message.text #使用者傳過來的訊息
+    api_key = keys["OPENAI_API_KEY"]
+    response = chat_with_chatgpt(user_message, api_key)
+   
+        
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message_with_http_info(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
-                messages=[TextMessage(text=event.message.text)]
+                messages=[TextMessage(text=response)]
             )
         )
 
