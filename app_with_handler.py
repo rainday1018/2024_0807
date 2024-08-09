@@ -16,7 +16,7 @@ import os
 import sys
 from argparse import ArgumentParser
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort  ,render_template
 from linebot.v3 import (
      WebhookHandler
 )
@@ -35,24 +35,16 @@ from linebot.v3.messaging import (
     TextMessage
 )
 import os,sys
+from heandle_key import get_secret_and_token 
+
 app = Flask(__name__)
+keys = get_secret_and_token ()
+handler = WebhookHandler(keys['LINE_BOT_SECRET_KEY'])
+configuration = Configuration( access_token=keys['LINE_CHANNEL_ACCESS_TOKEN'])
 
-# get channel_secret and channel_access_token from your environment variable
-channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
-channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
-if channel_secret is None:
-    print('Specify LINE_CHANNEL_SECRET as environment variable.')
-    sys.exit(1)
-if channel_access_token is None:
-    print('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
-    sys.exit(1)
-
-handler = WebhookHandler(channel_secret)
-
-configuration = Configuration(
-    access_token=channel_access_token
-)
-
+@app.route("/")
+def say_hello_world(username=""):
+    return render_template("hello.html",name=username)
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -85,11 +77,4 @@ def message_text(event):
 
 
 if __name__ == "__main__":
-    arg_parser = ArgumentParser(
-        usage='Usage: python ' + __file__ + ' [--port <port>] [--help]'
-    )
-    arg_parser.add_argument('-p', '--port', default=8000, help='port')
-    arg_parser.add_argument('-d', '--debug', default=False, help='debug')
-    options = arg_parser.parse_args()
-
-    app.run(debug=options.debug, port=options.port)
+    app.run(debug=True)

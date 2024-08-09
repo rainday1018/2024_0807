@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort ,render_template
 
 from linebot.v3 import (
     WebhookHandler
@@ -27,6 +27,11 @@ handler = WebhookHandler('LINE_BOT_SECRET_KEY' , None)
 #也就是所謂的呼叫 Webhook server
 #因為官方會把使用者傳輸的訊息轉傳給 Webhook server
 #所以會使用 RESTful API 的 POST 方法
+
+@app.route("/")
+def say_hello_world(username=""):
+    return render_template("hello.html",name=username)
+
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
@@ -61,4 +66,4 @@ def handle_message(event):
         )
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
