@@ -1,21 +1,23 @@
 import os,sys
 def get_secret_and_token():
-    # get channel_secret and channel_access_token from your environment variable
-    channel_secret = os.getenv('LINE_BOT_SECRET_KEY', None)
-    channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
-    openai_api_key = os.getenv("OPENAI_API_KEY", None)
-    if channel_secret is None:
-        print('Specify LINE_BOT_SECRET_KEY as environment variable.')
-        sys.exit(1)
-    if channel_access_token is None:
-        print('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
-        sys.exit(1)
-
-    if openai_api_key is None:
-        print('Specify OPENAI_API_KEY as environment variable.')
-        sys.exit(1)    
-    return {
-        'LINE_BOT_SECRET_KEY' : channel_secret,
-        'LINE_CHANNEL_ACCESS_TOKEN' : channel_access_token,
-        'OPENAI_API_KEY': openai_api_key
+    # 1. 先到Line Developer Console，把 Channel Secret & Channel Access Token複製起來
+    # 2. 把這兩個密文，存到環境變數內；工具列搜尋<環境變數>，新增兩個環境變數，並且把值貼上去
+    # 3. 按下確定儲存，要記得你的變數名稱，這些資訊只會存在你當前使用的電腦裡。
+    # 4. 透過以下程式碼，取得環境變數儲存的對應數值。
+    tokens_name ={
+        'LINE_BOT_SECRET_KEY' ,
+        'LINE_CHANNEL_ACCESS_TOKEN' ,
+        "OPENAI_API_KEY" ,
+        "TWDAY_KEY"
     }
+    keys = dict()
+    for token_name in tokens_name :
+        token = os.getenv(token_name, None)
+        if token is None:
+            print(f'Specify {token_name} as environment variable.')
+            sys.exit(1)
+        keys[token_name]=token
+
+
+    return keys
+    
